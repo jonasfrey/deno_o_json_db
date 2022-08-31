@@ -12,7 +12,7 @@ var f_s_ymd_hms = function(n_unix_ts_ms){
     return s_hms_ymd;
 }
 
-class O_data_manager_callback{
+class O_json_db_callback{
     constructor(
         f_function,
         s_crud_operation_name
@@ -21,7 +21,7 @@ class O_data_manager_callback{
         this.s_crud_operation_name = s_crud_operation_name
     }
 }
-class O_data_manager_config{
+class O_json_db_config{
     constructor(
         s_path_name_file_name
     ){
@@ -55,7 +55,7 @@ class O_data_manager_config{
         this.o = o_config_default
     }
 }
-class O_data_manager_json_file{
+class O_json_db_json_file{
     constructor(o_class){
 
         this.s_file_name = import.meta.url.split(s_directory_separator).pop()
@@ -120,13 +120,13 @@ class O_data_manager_json_file{
     }
 
 }
-class O_data_manager{
+class O_json_db{
     constructor(){
-        this.o_data_manager_json_file = new O_data_manager_json_file(new Object());// using Object as dummy
-        this.o_config = new O_data_manager_config(this.s_file_name+"_config.json");
+        this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
+        this.o_config = new O_json_db_config(this.s_file_name+"_config.json");
         var self = this
         this.a_o_callback = [
-            new O_data_manager_callback(
+            new O_json_db_callback(
                 function(o_class, o_instance){
 
                     if(
@@ -145,11 +145,11 @@ class O_data_manager{
                 }, 
                 "create", 
             ), 
-            // new O_data_manager_callback(
+            // new O_json_db_callback(
             //     function(o_class, o_instance){}, 
             //     "read", 
             // ), 
-            new O_data_manager_callback(
+            new O_json_db_callback(
                 function(o_class, o_instance){
 
                     if(
@@ -168,29 +168,29 @@ class O_data_manager{
                 }, 
                 "update", 
             ),
-            // new O_data_manager_callback(
+            // new O_json_db_callback(
             //     function(o_class, o_instance){}, 
             //     "delete", 
             // )
         ]
         console.log(this.a_o_callback)
     }
-    f_o_data_manager_json_file(o_class){
+    f_o_json_db_json_file(o_class){
 
-        if(o_class.name != this.o_data_manager_json_file.o_class.name){
-            this.o_data_manager_json_file = new O_data_manager_json_file(o_class);
+        if(o_class.name != this.o_json_db_json_file.o_class.name){
+            this.o_json_db_json_file = new O_json_db_json_file(o_class);
         }
-        return this.o_data_manager_json_file
+        return this.o_json_db_json_file
     }
     async f_a_o_read_file(o_class){
-        this.o_data_manager_json_file = this.f_o_data_manager_json_file(o_class)
-        return await this.o_data_manager_json_file.f_read_file()
-        // return o_data_manager_json_file.a_o;
+        this.o_json_db_json_file = this.f_o_json_db_json_file(o_class)
+        return await this.o_json_db_json_file.f_read_file()
+        // return o_json_db_json_file.a_o;
     }
     async f_a_o_write_file(o_class){
-        this.o_data_manager_json_file = this.f_o_data_manager_json_file(o_class)
-        // await this.o_data_manager_json_file.f_read_file()
-        return await this.o_data_manager_json_file.f_write_file()
+        this.o_json_db_json_file = this.f_o_json_db_json_file(o_class)
+        // await this.o_json_db_json_file.f_read_file()
+        return await this.o_json_db_json_file.f_write_file()
     }
 
     async f_o_create(
@@ -220,7 +220,7 @@ class O_data_manager{
             )
         }
 
-        this.o_data_manager_json_file.a_o.push(o_instance);
+        this.o_json_db_json_file.a_o.push(o_instance);
 
         this.f_a_o_write_file(o_class);
         return o_instance
@@ -294,10 +294,10 @@ class O_data_manager{
                 return !b_match
             }
         )
-        this.o_data_manager_json_file.a_o = a_o_filtered
+        this.o_json_db_json_file.a_o = a_o_filtered
         this.f_a_o_write_file(o_class);
-        return this.o_data_manager_json_file.a_o
+        return this.o_json_db_json_file.a_o
     }
 }
 
-export {O_data_manager, O_data_manager_callback}
+export {O_json_db, O_json_db_callback}
