@@ -14,26 +14,26 @@ class O_test{
 // import the model 
 import { O_test } from "...O_test.module.js"
 // import the datamanger
-import { O_data_manager} from "...O_data_manager.module.js"
+import { O_json_db} from "http://deno.land/x/o_json_db/O_json_db.module.js"
 ```
 ## create instance
 ```javascript
-const o_data_manager = new O_data_manager();
+const o_json_db = new O_json_db();
 ```
 ## create/insert a new entry/object
 ```javascript
 //create some objects
-var o = await o_data_manager.f_o_create(new O_test('leguan')); 
+var o = await o_json_db.f_o_create(new O_test('leguan')); 
 console.log(o)
-var o = await o_data_manager.f_o_create(new O_test('cat')); 
+var o = await o_json_db.f_o_create(new O_test('cat')); 
 console.log(o)
-var o = await o_data_manager.f_o_create(new O_test('gorilla')); 
+var o = await o_json_db.f_o_create(new O_test('gorilla')); 
 console.log(o)
 ```
 
 ## select * / get all 
 ```javascript
-var a_o = await o_data_manager.f_a_o_read(
+var a_o = await o_json_db.f_a_o_read(
     O_test,
     {}
 );
@@ -43,7 +43,7 @@ console.log(a_o)
 in this example find where n_id is 5
 ```javascript
 console.log("read with criterium (n_id : 5)")
-var a_o = await o_data_manager.f_a_o_read(
+var a_o = await o_json_db.f_a_o_read(
     O_test,
     {n_id: 5}
 );
@@ -52,7 +52,7 @@ console.log(a_o)
 where s_name == "hello"
 ```javascript
 console.log("read with criterium (s_name: 'hello')")
-var a_o = await o_data_manager.f_a_o_read(
+var a_o = await o_json_db.f_a_o_read(
     O_test,
     {s_name: "hello"}
 );
@@ -62,7 +62,7 @@ console.log(a_o)
 ## delete/remove/destroy/unset where 
 ```javascript
 console.log("delete with criterium {s_name: 'hello'}")
-var a_o = await o_data_manager.f_a_o_delete(
+var a_o = await o_json_db.f_a_o_delete(
     O_test, 
     {
         s_name: "hello"
@@ -72,14 +72,14 @@ var a_o = await o_data_manager.f_a_o_delete(
 ## update/modify entries 
 ```javascript
 console.log("update with criterium {s_name: 'leguan'}, updated {s_name: 'iguana'}") 
-var a_o = await o_data_manager.f_a_o_update(
+var a_o = await o_json_db.f_a_o_update(
     O_test,
     {s_name:"leguan"},
     {s_name:"iguana"}
 );
 console.log(a_o)
 ```
-# o_data_manager_config.module.js_config.json
+# o_json_db_config.module.js_config.json
 example of the config 
 every model will get the timestamps
 ```json
@@ -118,8 +118,8 @@ do the following to add custom timestamps
 ```
 ## add custom callback functions
 ```javascript
-o_data_manager.a_o_callback.push(
-    new O_data_manager_callback(
+o_json_db.a_o_callback.push(
+    new O_json_db_callback(
         function(o_class, o_instance){
 
             if(
