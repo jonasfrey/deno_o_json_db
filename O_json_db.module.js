@@ -122,6 +122,7 @@ class O_json_db_json_file{
 }
 class O_json_db{
     constructor(){
+        this.s_file_name = import.meta.url.split(s_directory_separator).pop()
         this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
         this.o_config = new O_json_db_config(this.s_file_name+"_config.json");
         var self = this
