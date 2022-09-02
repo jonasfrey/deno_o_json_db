@@ -43,7 +43,7 @@ class O_json_db_config{
         var o_config_default = this.o
         try {
             const s_json = await Deno.readTextFile(this.s_path_name_file_name);
-            console.log(s_json );
+            // console.log(s_json );
             try {
                 o_config_default = JSON.parse(s_json)
             } catch (error) {
@@ -109,7 +109,7 @@ class O_json_db_json_file{
         
         await ensureDir(this.s_path_name)
         await ensureFile(this.s_path_name_file_name);
-        console.log(this.a_o)        
+        // console.log(this.a_o)        
         try {
             Deno.writeTextFileSync(this.s_path_name_file_name, JSON.stringify(this.a_o))
         } catch (error) {
@@ -174,7 +174,7 @@ class O_json_db{
             //     "delete", 
             // )
         ]
-        console.log(this.a_o_callback)
+        // console.log(this.a_o_callback)
     }
     f_o_json_db_json_file(o_class){
 
@@ -251,7 +251,7 @@ class O_json_db{
             function(o){
                 var b_match = true;
                 for(var s_prop in o_instance){
-                    console.log(s_prop)
+                    // console.log(s_prop)
                     b_match = o_instance[s_prop] == o[s_prop]
                 }
                 return b_match
