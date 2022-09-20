@@ -94,9 +94,11 @@ class O_json_db{
         this.o_config =
         this.s_path_o_config = "./o_json_db_config.module.js"; 
         this.s_url_o_config = "https://deno.land/x/o_json_db@[version]/o_json_db_config.module.js"; 
+        this.b_init = false;
+    }
+    async f_init(){
         var self = this;
-        var f = async function(){
-
+        if(!self.b_init){            
             try{
                 var o_stat = await Deno.stat(self.s_path_o_config)
                 var {o_json_db_config} = await import(self.s_path_o_config)
@@ -106,66 +108,62 @@ class O_json_db{
                 console.log(`wget ${self.s_url_o_config}`)
                 Deno.exit(1)
             }
-            return Promise.resolve(self)
+
+            
+            self.a_o_callback = [
+                new O_json_db_callback(
+                    function(o_class, o_instance){
+
+                        if(
+                            self.o_config.a_s_class_name_default_timestamp_enabled.includes('*')
+                            ||
+                            self.o_config.a_s_class_name_default_timestamp_enabled.includes(o_class.name)
+                            ){
+                                if(
+                                    self.o_config.a_s_class_name_default_timestamp_disabled.includes(o_class.name) == false
+                                ){
+                                    var n_ts_ut_ms = new Date().getTime();
+                                    o_instance[self.o_config.s_prop_name_timestamp_create_number] = n_ts_ut_ms
+                                    o_instance[self.o_config.s_prop_name_timestamp_create_string] = f_s_ymd_hms(n_ts_ut_ms)
+                                }
+                        }
+                    }, 
+                    "create", 
+                ), 
+                // new O_json_db_callback(
+                //     function(o_class, o_instance){}, 
+                //     "read", 
+                // ), 
+                new O_json_db_callback(
+                    function(o_class, o_instance){
+
+                        if(
+                            self.o_config.a_s_class_name_default_timestamp_enabled.includes('*')
+                            ||
+                            self.o_config.a_s_class_name_default_timestamp_enabled.includes(o_class.name)
+                            ){
+                                if(
+                                    self.o_config.a_s_class_name_default_timestamp_disabled.includes(o_class.name) == false
+                                ){
+                                    var n_ts_ut_ms = new Date().getTime();
+                                    o_instance[self.o_config.s_prop_name_timestamp_update_number] = n_ts_ut_ms
+                                    o_instance[self.o_config.s_prop_name_timestamp_update_string] = f_s_ymd_hms(n_ts_ut_ms)
+                                }
+                        }
+                    }, 
+                    "update", 
+                ),
+                // new O_json_db_callback(
+                //     function(o_class, o_instance){}, 
+                //     "delete", 
+                // )
+            ]
+
+            this.b_init = true;
         }
-        f().then(
-            function(self){
-                console.log(self)
-                self.a_o_callback = [
-                    new O_json_db_callback(
-                        function(o_class, o_instance){
-        
-                            if(
-                                self.o_config.a_s_class_name_default_timestamp_enabled.includes('*')
-                                ||
-                                self.o_config.a_s_class_name_default_timestamp_enabled.includes(o_class.name)
-                                ){
-                                    if(
-                                        self.o_config.a_s_class_name_default_timestamp_disabled.includes(o_class.name) == false
-                                    ){
-                                        var n_ts_ut_ms = new Date().getTime();
-                                        o_instance[self.o_config.s_prop_name_timestamp_create_number] = n_ts_ut_ms
-                                        o_instance[self.o_config.s_prop_name_timestamp_create_string] = f_s_ymd_hms(n_ts_ut_ms)
-                                    }
-                            }
-                        }, 
-                        "create", 
-                    ), 
-                    // new O_json_db_callback(
-                    //     function(o_class, o_instance){}, 
-                    //     "read", 
-                    // ), 
-                    new O_json_db_callback(
-                        function(o_class, o_instance){
-        
-                            if(
-                                self.o_config.a_s_class_name_default_timestamp_enabled.includes('*')
-                                ||
-                                self.o_config.a_s_class_name_default_timestamp_enabled.includes(o_class.name)
-                                ){
-                                    if(
-                                        self.o_config.a_s_class_name_default_timestamp_disabled.includes(o_class.name) == false
-                                    ){
-                                        var n_ts_ut_ms = new Date().getTime();
-                                        o_instance[self.o_config.s_prop_name_timestamp_update_number] = n_ts_ut_ms
-                                        o_instance[self.o_config.s_prop_name_timestamp_update_string] = f_s_ymd_hms(n_ts_ut_ms)
-                                    }
-                            }
-                        }, 
-                        "update", 
-                    ),
-                    // new O_json_db_callback(
-                    //     function(o_class, o_instance){}, 
-                    //     "delete", 
-                    // )
-                ]
-                // console.log(this.a_o_callback)
-            }
-        );
 
     }
     f_o_json_db_json_file(o_class){
-
         if(o_class.name != this.o_json_db_json_file.o_class.name){
             this.o_json_db_json_file = new O_json_db_json_file(o_class);
         }
@@ -186,6 +184,7 @@ class O_json_db{
         o_instance,
         s_prop_name_id = 'n_id'
     ){
+        await this.f_init();
         var o_class = o_instance.constructor;
         var a = await this.f_a_o_read_file(o_class);
         const b_property_n_id_exists = o_instance.hasOwnProperty(s_prop_name_id);
@@ -218,6 +217,7 @@ class O_json_db{
         o_class, 
         o_filter_criterium = {}
     ){
+        await this.f_init();
         
         var a = await this.f_a_o_read_file(o_class);
         var a_o_filtered = a.filter(function(o){
@@ -234,6 +234,8 @@ class O_json_db{
         o_instance,
         o_instance_updated
     ){
+        await this.f_init();
+
         var a = await this.f_a_o_read_file(o_class);
         var a_o_filtered = a.filter(
             function(o){
@@ -272,6 +274,8 @@ class O_json_db{
         o_class, 
         o_filter_criterium
     ){
+        await this.f_init();
+
         var a = await this.f_a_o_read_file(o_class);
         var a_o_filtered = a.filter(
             function(o, n_index){
