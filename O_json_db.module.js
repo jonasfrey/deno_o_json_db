@@ -114,9 +114,15 @@ class O_json_db{
                 a_s_part.pop()
                 a_s_part.push(this.s_path_o_config)
                 var s_url = a_s_part.join("/")
-                console.log(s_url)
+                // s_url = "https://deno.land/x/o_json_db@1.2/./o_json_db_config.module.js" //tmp for testing
+                // console.log(s_url)
                 var o_response = await fetch(s_url)
-                console.log(o_response)
+                var s_text = await o_response.text();
+                console.log(`${s_url} :downloading required configuration file`)
+                await Deno.writeTextFile(this.s_path_o_config, s_text);
+                // console.log(s_text)
+                // console.log(o_response)
+                // Deno.exit(1)
             }
 
             
