@@ -1,1 +1,4 @@
 test_url_import
+test_import_from_url
+test_import_from_url/
+test_import_from_url/*
