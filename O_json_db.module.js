@@ -97,7 +97,6 @@ class O_json_db{
         this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
         this.o_config =
         this.s_path_o_config = "./o_json_db_config.module.js"; 
-        this.s_url_o_config = "https://deno.land/x/o_json_db@[version]/o_json_db_config.module.js"; 
         this.b_init = false;
     }
     async f_init(){
@@ -108,9 +107,16 @@ class O_json_db{
                 var {o_json_db_config} = await import(self.s_path_o_config)
                 self.o_config = o_json_db_config
             }catch{
-                console.log(`${self.s_path_o_config} file does not exists, please download it with this command:`)
-                console.log(`wget ${self.s_url_o_config}`)
-                Deno.exit(1)
+                // console.log(`${self.s_path_o_config} file does not exists, please download it with this command:`)
+                // console.log(`wget ${self.s_url_o_config}`)
+                // Deno.exit(1)
+                var a_s_part = import.meta.url.split("/");
+                a_s_part.pop()
+                a_s_part.push(this.s_path_o_config)
+                var s_url = a_s_part.join("/")
+                console.log(s_url)
+                var o_response = await fetch(s_url)
+                console.log(o_response)
             }
 
             
