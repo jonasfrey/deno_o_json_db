@@ -62,10 +62,14 @@ class O_json_db_json_file{
         // console.log(s_path_name_file_name)
         
         this.s_json = await Deno.readTextFile(this.s_path_name_file_name);
+        if(this.s_json == ''){
+            this.s_json = "[]"
+        } 
         try {
             this.a_o = JSON.parse(this.s_json);
         } catch (error) {
-            console.log(error)
+            // file is not JSON parsable
+            // console.log(error)
             // console.log(this.s_json)
             this.a_o = []
         }
