@@ -104,8 +104,6 @@ class O_json_db{
         if(!self.b_init){            
             try{
                 var o_stat = await Deno.stat(self.s_path_o_config)
-                var {o_json_db_config} = await import(self.s_path_o_config)
-                self.o_config = o_json_db_config
             }catch{
                 // console.log(`${self.s_path_o_config} file does not exists, please download it with this command:`)
                 // console.log(`wget ${self.s_url_o_config}`)
@@ -124,7 +122,8 @@ class O_json_db{
                 // console.log(o_response)
                 // Deno.exit(1)
             }
-
+            var {o_json_db_config} = await import(self.s_path_o_config)
+            self.o_config = o_json_db_config
             
             self.a_o_callback = [
                 new O_json_db_callback(
