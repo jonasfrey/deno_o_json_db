@@ -99,7 +99,7 @@ class O_json_db{
         this.s_path_o_config = null;
         this.b_init = false;
     }
-    async f_ensure_module_config(){
+    async f_o_config(){
         
         var a_s_part = import.meta.url.split("/");
         var s_file_name = a_s_part.pop()
@@ -117,20 +117,20 @@ class O_json_db{
         var s_text = await o_response.text();
         console.log(`${s_url} :downloading required configuration file`)
         await Deno.writeTextFile(this.s_path_o_config, s_text);
+
+        var {o_json_db_config} = await import(self.s_path_o_config)
+        return Promise.resolve(o_json_db_config)
     }
     async f_init(){
-
 
         var self = this;
         if(!self.b_init){            
             try{
                 var o_stat = await Deno.stat(self.s_path_o_config)
             }catch{
-                await this.f_ensure_module_config();
+                self.o_config = await this.f_o_config();
             }
-            var {o_json_db_config} = await import(self.s_path_o_config)
-            self.o_config = o_json_db_config
-            
+
             self.a_o_callback = [
                 new O_json_db_callback(
                     function(o_class, o_instance){
