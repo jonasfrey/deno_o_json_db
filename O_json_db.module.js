@@ -96,31 +96,37 @@ class O_json_db{
         this.s_file_name = import.meta.url.split(s_directory_separator).pop()
         this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
         this.o_config =
-        this.s_path_o_config = "./o_json_db_config.module.js"; 
+        this.s_path_o_config = null;
         this.b_init = false;
     }
+    async f_ensure_module_config(){
+        
+        var a_s_part = import.meta.url.split("/");
+        var s_file_name = a_s_part.pop()
+        var a_s_part_filename = s_file_name.split('.')
+        a_s_part_filename[0] = a_s_part_filename[0].toLowerCase()+"_config"
+        var s_file_name_config = a_s_part_filename.join(".")
+        this.s_path_o_config = "./"+s_file_name_config
+        a_s_part.push(this.s_path_o_config)
+        var s_url = a_s_part.join("/")
+        // console.log(`${self.s_path_o_config} file does not exists, please download it with this command:`)
+        // console.log(`wget ${self.s_url_o_config}`)
+        // Deno.exit(1)
+        // s_url = "https://deno.land/x/o_json_db@1.2/./o_json_db_config.module.js" //tmp for testing
+        var o_response = await fetch(s_url)
+        var s_text = await o_response.text();
+        console.log(`${s_url} :downloading required configuration file`)
+        await Deno.writeTextFile(this.s_path_o_config, s_text);
+    }
     async f_init(){
+
+
         var self = this;
         if(!self.b_init){            
             try{
                 var o_stat = await Deno.stat(self.s_path_o_config)
             }catch{
-                // console.log(`${self.s_path_o_config} file does not exists, please download it with this command:`)
-                // console.log(`wget ${self.s_url_o_config}`)
-                // Deno.exit(1)
-                var a_s_part = import.meta.url.split("/");
-                a_s_part.pop()
-                a_s_part.push(this.s_path_o_config)
-                var s_url = a_s_part.join("/")
-                // s_url = "https://deno.land/x/o_json_db@1.2/./o_json_db_config.module.js" //tmp for testing
-                // console.log(s_url)
-                var o_response = await fetch(s_url)
-                var s_text = await o_response.text();
-                console.log(`${s_url} :downloading required configuration file`)
-                await Deno.writeTextFile(this.s_path_o_config, s_text);
-                // console.log(s_text)
-                // console.log(o_response)
-                // Deno.exit(1)
+                await this.f_ensure_module_config();
             }
             var {o_json_db_config} = await import(self.s_path_o_config)
             self.o_config = o_json_db_config
