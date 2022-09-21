@@ -111,7 +111,7 @@ class O_json_db{
         var s_url = a_s_part.join("/")
 
         try{
-            var o_stat = await Deno.stat(self.s_path_o_config)
+            var o_stat = await Deno.stat(this.s_path_o_config)
         }catch{
             
             // console.log(`${this.s_path_o_config} file does not exists, please download it with this command:`)
