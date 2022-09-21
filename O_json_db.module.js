@@ -93,6 +93,15 @@ class O_json_db_json_file{
 }
 class O_json_db{
     constructor(){
+        
+        var a_s_part_import_meta_url = import.meta.url.split('/')
+        var s_file_name = a_s_part_import_meta_url.pop();
+        var s_path_name = a_s_part_import_meta_url.join("/")
+
+        this.s_import_meta_url = import.meta.url                    // 'https://deno.land/x/[modname]@[versname]/[filename]'
+        this.s_import_meta_url_path_file_name = s_file_name;        // '[filename]'
+        this.s_import_meta_url_path_folder_name = s_path_name+"/";      // 'https://deno.land/x/[modname]@[versname]'
+        
         this.s_file_name = import.meta.url.split(s_directory_separator).pop()
         this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
         this.o_config =
@@ -100,18 +109,14 @@ class O_json_db{
         this.b_init = false;
     }
     async f_o_config(){
-        
-        var a_s_part = import.meta.url.split("/");
-        var s_file_name = a_s_part.pop()
-        var a_s_part_filename = s_file_name.split('.')
-        a_s_part_filename[0] = a_s_part_filename[0].toLowerCase()+"_config"
-        var s_file_name_config = a_s_part_filename.join(".")
-        this.s_path_o_config = "./"+s_file_name_config
-        a_s_part.push(this.s_path_o_config)
-        var s_url = a_s_part.join("/")
+
+        var s_part = this.s_import_meta_url_path_file_name.split('.');
+        var s_path = "./"+s_part[0].toLowerCase()+"_config." + s_part.slice(1).join('.')
+        var s_url = this.s_import_meta_url_path_folder_name + s_path
+
 
         try{
-            var o_stat = await Deno.stat(this.s_path_o_config)
+            var o_stat = await Deno.stat(s_path)
         }catch{
             
             // console.log(`${this.s_path_o_config} file does not exists, please download it with this command:`)
@@ -121,9 +126,9 @@ class O_json_db{
             var o_response = await fetch(s_url)
             var s_text = await o_response.text();
             console.log(`${s_url} :file did not exists yet, and was downloaded automaitcally`)
-            await Deno.writeTextFile(this.s_path_o_config, s_text);
+            await Deno.writeTextFile(s_path, s_text);
         }
-        var {o_json_db_config} = await import(this.s_path_o_config)
+        var {o_json_db_config} = await import(s_path)
         return Promise.resolve(o_json_db_config)
     }
     async f_init(){
