@@ -109,28 +109,30 @@ class O_json_db{
         this.s_path_o_config = "./"+s_file_name_config
         a_s_part.push(this.s_path_o_config)
         var s_url = a_s_part.join("/")
-        // console.log(`${this.s_path_o_config} file does not exists, please download it with this command:`)
-        // console.log(`wget ${self.s_url_o_config}`)
-        // Deno.exit(1)
-        // s_url = "https://deno.land/x/o_json_db@1.2/./o_json_db_config.module.js" //tmp for testing
-        var o_response = await fetch(s_url)
-        var s_text = await o_response.text();
-        console.log(`${s_url} :downloading required configuration file`)
-        await Deno.writeTextFile(this.s_path_o_config, s_text);
 
+        try{
+            var o_stat = await Deno.stat(self.s_path_o_config)
+        }catch{
+            
+            // console.log(`${this.s_path_o_config} file does not exists, please download it with this command:`)
+            // console.log(`wget ${self.s_url_o_config}`)
+            // Deno.exit(1)
+            // s_url = "https://deno.land/x/o_json_db@1.2/./o_json_db_config.module.js" //tmp for testing
+            var o_response = await fetch(s_url)
+            var s_text = await o_response.text();
+            console.log(`${s_url} :file did not exists yet, and was downloaded automaitcally`)
+            await Deno.writeTextFile(this.s_path_o_config, s_text);
+        }
         var {o_json_db_config} = await import(this.s_path_o_config)
         return Promise.resolve(o_json_db_config)
     }
     async f_init(){
 
         var self = this;
-        if(!self.b_init){            
-            try{
-                var o_stat = await Deno.stat(self.s_path_o_config)
-            }catch{
-                self.o_config = await this.f_o_config();
-                
-            }
+        if(!self.b_init){
+            self.o_config = await this.f_o_config();
+            
+
 
             self.a_o_callback = [
                 new O_json_db_callback(
