@@ -120,7 +120,7 @@ class O_json_db{
         var s_pathfile_local = o_url_first_js_file.o_URL.href.split("file://").slice(1)[0].split("/").slice(0,-1).join("/") +"/"+ s_path_relative;
         console.log(s_pathfile_local)
         try{
-            var o_stat = Deno.stat(s_pathfile_local);
+            var o_stat = await Deno.stat(s_pathfile_local);
         }catch{
             var o_response = await fetch(s_urlpathfile_remote)
             var s_text = await o_response.text();
