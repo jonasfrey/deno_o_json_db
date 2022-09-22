@@ -115,7 +115,7 @@ class O_json_db{
         console.log(a_o_url)
         var o_url_first_js_file = a_o_url.slice(-1)[0];
         var s_import_meta_url_path_folder_name = import.meta.url.split("/").slice(0,-1).join("/"); 
-        var s_urlpathfile_remote = s_import_meta_url_path_folder_name + s_path_relative;
+        var s_urlpathfile_remote = s_import_meta_url_path_folder_name + "/" + s_path_relative;
         var s_urlpathfile_local = o_url_first_js_file.o_URL.href.split("/").slice(0,-1).join("/") + "/" + s_path_relative;
         var s_pathfile_local = o_url_first_js_file.o_URL.href.split("file://").slice(1)[0].split("/").slice(0,-1).join("/") +"/"+ s_path_relative;
         console.log(s_pathfile_local)
