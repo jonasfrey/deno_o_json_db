@@ -64,16 +64,16 @@ class O_json_db_json_file{
         // console.log(s_path_name_file_name)
         
         this.s_json = await Deno.readTextFile(this.s_path_name_file_name);
-        if(this.s_json == ''){
+        if(this.s_json == ""){
             this.s_json = "[]"
         } 
         try {
             this.a_o = JSON.parse(this.s_json);
         } catch (error) {
             // file is not JSON parsable
-            // console.log(error)
-            // console.log(this.s_json)
-            this.a_o = []
+            console.log(error)
+            console.log(`${this.s_path_name_file_name}: please make sure the content of this file is valid JSON !`)
+            Deno.exit(1)
         }
         return this.a_o
     }
@@ -139,9 +139,8 @@ class O_json_db{
 
         var self = this;
         if(!self.b_init){
-            self.o_config = (await this.f_o_config()).o_json_db_config;
-            
 
+            self.o_config = (await this.f_o_config()).o_json_db_config;
 
             self.a_o_callback = [
                 new O_json_db_callback(
@@ -243,7 +242,7 @@ class O_json_db{
 
         this.o_json_db_json_file.a_o.push(o_instance);
 
-        this.f_a_o_write_file(o_class);
+        await this.f_a_o_write_file(o_class);
         return o_instance
     }
     async f_a_o_read(
@@ -321,7 +320,7 @@ class O_json_db{
             }
         )
         this.o_json_db_json_file.a_o = a_o_filtered
-        this.f_a_o_write_file(o_class);
+        await this.f_a_o_write_file(o_class);
         return this.o_json_db_json_file.a_o
     }
 }

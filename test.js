@@ -1,20 +1,13 @@
-import { O_test } from "./O_test.module.js"
+
 import { O_json_db} from "./O_json_db.module.js"
 
 
-// class Person {}
-// var a = new Person()
-// console.log(a.constructor)
-// var b = new a.constructor()
-// console.log(b)
-// var o = {}
-// o.constructor()
-// console.log(o.constructor.name); 
-// var a = []
-// a.constructor()
-// console.log(a.constructor.name); 
-// Deno.exit(0);
-
+class O_test{
+    constructor(s_name){
+        this.n_id = 0; 
+        this.s_name = s_name
+    }
+}
 
 var o_json_db = new O_json_db();
 
@@ -83,6 +76,43 @@ var a_o = await o_json_db.f_a_o_update(
 );
 console.log(a_o)
 
+
+
+console.log("test behaviour if a file would get corrupted somehow")
+
+class O_test_json_corruption{
+    constructor(s_name){
+        this.s_name = s_name
+    }
+}
+
+var o = await o_json_db.f_o_create(new O_test_json_corruption('one')); 
+var o = await o_json_db.f_o_create(new O_test_json_corruption('two')); 
+var o = await o_json_db.f_o_create(new O_test_json_corruption('three'));
+
+var s_corrupt_or_nonvalid_json = `
+{
+    's_name': 'one'//comment is not allowed in valid json
+},
+{
+    s_name: 'two'// property names need to be quoted 
+},
+{
+    s_name: 'three', // a trailing comma is not allowed
+}
+`
+var s_path = "./.O_json_db/A_o_test_json_corruption.json";
+try{
+    await Deno.remove(s_path)
+}catch(e){
+    console.log(e)
+}
+var s = await Deno.writeTextFile(s_path, s_corrupt_or_nonvalid_json);
+var s = await Deno.readTextFile(s_path);
+console.log(s_path)
+console.log(s)
+var o = await o_json_db.f_o_create(new O_test_json_corruption('four'));
+console.log("done")
 
 // var n_i =0; 
 // while(n_i < 5){
