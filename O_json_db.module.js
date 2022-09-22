@@ -3,6 +3,8 @@ import {
     ensureDir,
     ensureFile,
   } from "https://deno.land/std@0.77.0/fs/mod.ts";
+import { f_a_o_url_stack_trace } from "./f_a_o_url_stack_trace.module.js";
+import {O_url} from "https://deno.land/x/o_url@0.3/O_url.module.js"
 
 var f_s_ymd_hms = function(n_unix_ts_ms){
     var o_date = new Date(n_unix_ts_ms);
@@ -94,48 +96,51 @@ class O_json_db_json_file{
 class O_json_db{
     constructor(){
         
-        var a_s_part_import_meta_url = import.meta.url.split('/')
-        var s_file_name = a_s_part_import_meta_url.pop();
-        var s_path_name = a_s_part_import_meta_url.join("/")
-
-        this.s_import_meta_url = import.meta.url                    // 'https://deno.land/x/[modname]@[versname]/[filename]'
-        this.s_import_meta_url_path_file_name = s_file_name;        // '[filename]'
-        this.s_import_meta_url_path_folder_name = s_path_name+"/";      // 'https://deno.land/x/[modname]@[versname]'
-        
         this.s_file_name = import.meta.url.split(s_directory_separator).pop()
+        this.o_url_import_meta_url = new O_url(import.meta.url);
         this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
-        this.o_config =
+        
         this.s_path_o_config = null;
         this.b_init = false;
     }
-    async f_o_config(){
 
-        var s_part = this.s_import_meta_url_path_file_name.split('.');
-        var s_path = "./"+s_part[0].toLowerCase()+"_config." + s_part.slice(1).join('.')
-        var s_url = this.s_import_meta_url_path_folder_name + s_path
+    async f_download_ifnotexisting_remote_module_and_import(s_path_relative){
 
+        // /home/root/tst.js            -> s_pathfile
+        // /home/root/                  -> s_pathfolder
+        // file:///home/root/tst.js     -> s_urlpathfile
+        // file:///home/root/           -> s_urlpathfolder
 
+        var a_o_url = f_a_o_url_stack_trace();
+        var o_url_first_js_file = a_o_url.slice(-1)[0];
+        var s_import_meta_url_path_folder_name = import.meta.url.split("/").slice(0,-1).join("/"); 
+        var s_urlpathfile_remote = s_import_meta_url_path_folder_name + s_path_relative;
+        var s_urlpathfile_local = o_url_first_js_file.o_URL.href.split("/").slice(0,-1).join("/") + "/" + s_path_relative;
+        var s_pathfile_local = o_url_first_js_file.o_URL.href.split("file://").slice(1)[0].split("/").slice(0,-1).join("/") +"/"+ s_path_relative;
         try{
-            var o_stat = await Deno.stat(s_path)
+            var o_stat = Deno.stat(s_pathfile_local);
         }catch{
-            
-            // console.log(`${this.s_path_o_config} file does not exists, please download it with this command:`)
-            // console.log(`wget ${self.s_url_o_config}`)
-            // Deno.exit(1)
-            // s_url = "https://deno.land/x/o_json_db@1.2/./o_json_db_config.module.js" //tmp for testing
-            var o_response = await fetch(s_url)
+            var o_response = await fetch(s_urlpathfile_remote)
             var s_text = await o_response.text();
-            console.log(`${s_url} :file did not exists yet, and was downloaded automaitcally`)
-            await Deno.writeTextFile(s_path, s_text);
+            console.log(`${s_urlpathfile_remote} :file did not exists yet, and was downloaded automaitcally`)
+            await Deno.writeTextFile(s_pathfile_local, s_text);
         }
-        var {o_json_db_config} = await import(s_path)
-        return Promise.resolve(o_json_db_config)
+        // see https://github.com/denoland/deno/issues/15984#issuecomment-1254379796
+        // import(file:///home/root/tst.js) //will work 
+        // import(/home/root/tst.js)        //wont work 
+        var o_module = await import(s_urlpathfile_local);
+        return Promise.resolve(o_module);
+    }
+    async f_o_config(){
+        var s_file_name = this.o_url_import_meta_url.o_folder_file.s_file_name.toLowerCase().split(".").map((s,n_i)=>(n_i==0) ? s+"_config": s).join(".");
+        // console.log(s_file_name);
+        return this.f_download_ifnotexisting_remote_module_and_import("./"+s_file_name)
     }
     async f_init(){
 
         var self = this;
         if(!self.b_init){
-            self.o_config = await this.f_o_config();
+            self.o_config = (await this.f_o_config()).o_json_db_config;
             
 
 
