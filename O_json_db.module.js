@@ -118,6 +118,7 @@ class O_json_db{
         var s_urlpathfile_remote = s_import_meta_url_path_folder_name + s_path_relative;
         var s_urlpathfile_local = o_url_first_js_file.o_URL.href.split("/").slice(0,-1).join("/") + "/" + s_path_relative;
         var s_pathfile_local = o_url_first_js_file.o_URL.href.split("file://").slice(1)[0].split("/").slice(0,-1).join("/") +"/"+ s_path_relative;
+        console.log(s_pathfile_local)
         try{
             var o_stat = Deno.stat(s_pathfile_local);
         }catch{
@@ -126,11 +127,13 @@ class O_json_db{
             console.log(`${s_urlpathfile_remote} :file did not exists yet, and was downloaded automaitcally`)
             await Deno.writeTextFile(s_pathfile_local, s_text);
         }
+        console.log(o_stat)
         // see https://github.com/denoland/deno/issues/15984#issuecomment-1254379796
         // import(file:///home/root/tst.js) //will work 
         // import(/home/root/tst.js)        //wont work 
         console.log(s_urlpathfile_local);
         var o_module = await import(s_urlpathfile_local);
+        Deno.exit(1)
         return Promise.resolve(o_module);
     }
     async f_o_config(){
