@@ -95,7 +95,7 @@ class O_json_db_json_file{
 }
 class O_json_db{
     constructor(){
-        
+        this.a_o_url_stack_trace = f_a_o_url_stack_trace();
         this.s_file_name = import.meta.url.split(s_directory_separator).pop()
         this.o_url_import_meta_url = new O_url(import.meta.url);
         this.o_json_db_json_file = new O_json_db_json_file(new Object());// using Object as dummy
@@ -110,9 +110,8 @@ class O_json_db{
         // /home/root/                  -> s_pathfolder
         // file:///home/root/tst.js     -> s_urlpathfile
         // file:///home/root/           -> s_urlpathfolder
-
-        var a_o_url = f_a_o_url_stack_trace();
-        var o_url_first_js_file = a_o_url.slice(-1)[0];
+        
+        var o_url_first_js_file = this.a_o_url_stack_trace.slice(-1)[0];
         var s_import_meta_url_path_folder_name = import.meta.url.split("/").slice(0,-1).join("/"); 
         var s_urlpathfile_remote = s_import_meta_url_path_folder_name + "/" + s_path_relative;
         var s_urlpathfile_local = o_url_first_js_file.o_URL.href.split("/").slice(0,-1).join("/") + "/" + s_path_relative;
