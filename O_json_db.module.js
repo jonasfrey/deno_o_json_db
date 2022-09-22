@@ -112,6 +112,7 @@ class O_json_db{
         // file:///home/root/           -> s_urlpathfolder
 
         var a_o_url = f_a_o_url_stack_trace();
+        console.log(a_o_url)
         var o_url_first_js_file = a_o_url.slice(-1)[0];
         var s_import_meta_url_path_folder_name = import.meta.url.split("/").slice(0,-1).join("/"); 
         var s_urlpathfile_remote = s_import_meta_url_path_folder_name + s_path_relative;
@@ -128,6 +129,7 @@ class O_json_db{
         // see https://github.com/denoland/deno/issues/15984#issuecomment-1254379796
         // import(file:///home/root/tst.js) //will work 
         // import(/home/root/tst.js)        //wont work 
+        console.log(s_urlpathfile_local);
         var o_module = await import(s_urlpathfile_local);
         return Promise.resolve(o_module);
     }
