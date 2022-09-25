@@ -143,7 +143,7 @@ class O_json_db{
 
             self.a_o_callback = [
                 new O_json_db_callback(
-                    function(o_class, o_instance){
+                    function(o_instance, o_class){
 
                         if(
                             self.o_config.a_s_class_name_default_timestamp_enabled.includes('*')
@@ -162,11 +162,11 @@ class O_json_db{
                     "create", 
                 ), 
                 // new O_json_db_callback(
-                //     function(o_class, o_instance){}, 
+                //     function(o_instance, o_class){}, 
                 //     "read", 
                 // ), 
                 new O_json_db_callback(
-                    function(o_class, o_instance){
+                    function(o_instance, o_class){
 
                         if(
                             self.o_config.a_s_class_name_default_timestamp_enabled.includes('*')
@@ -185,7 +185,7 @@ class O_json_db{
                     "update", 
                 ),
                 // new O_json_db_callback(
-                //     function(o_class, o_instance){}, 
+                //     function(o_instance, o_class){}, 
                 //     "delete", 
                 // )
             ]
@@ -211,115 +211,124 @@ class O_json_db{
         return await this.o_json_db_json_file.f_write_file()
     }
 
-    async f_o_create(
+    async f_apply_callback_before_write_file(
+        s_crud_operation_name, 
+        a_o, 
+        o_class
+    ){
+        var a_o_callback_filtered = this.a_o_callback.filter(
+            o=>o.s_crud_operation_name == s_crud_operation_name
+        )
+
+        for(var n_index in a_o){
+            var o = a_o[n_index];
+            for(var n_index in a_o_callback_filtered){
+                const o_callback  = a_o_callback_filtered[n_index];
+                // console.log(o_callback)
+                o_callback.f_function(
+                    o,
+                    o_class
+                )
+            }
+        }
+    }
+    
+    async f_a_o_create(
+        o_class,
         o_instance,
         s_prop_name_id = 'n_id'
     ){
+        
         await this.f_init();
-        var o_class = o_instance.constructor;
+        
         var a = await this.f_a_o_read_file(o_class);
-        const b_property_n_id_exists = o_instance.hasOwnProperty(s_prop_name_id);
-    
-        if(b_property_n_id_exists){
-            
+        
+        var n_id = o_instance[s_prop_name_id];
+
+        if(n_id == undefined || n_id == null || n_id == 0){
             var n_id_max = parseInt(Math.max(0,...a.map(o=>parseInt(o[s_prop_name_id]))))
-            // console.log(n_id_max)
-            o_instance[s_prop_name_id] = n_id_max+1        
-        }
-        // console.log(this)
-        var a_o_callback_filtered = this.a_o_callback.filter(
-            o=>o.s_crud_operation_name == 'create'
-        )
-        for(var n_index in a_o_callback_filtered){
-            const o_callback  = a_o_callback_filtered[n_index];
-            // console.log(o_callback)
-            o_callback.f_function(
-                o_class,
-                o_instance
+            o_instance[s_prop_name_id] = n_id_max+1
+        }else{
+            var a_o_filtered = a.filter(
+                function(o){
+                    return o[s_prop_name_id] == n_id
+                }
             )
+            if(a_o_filtered.length > 0){
+                console.log(`${JSON.stringify(o_instance)}: cannot create object, object(s) with n_id ${n_id} already exists (${JSON.stringify(a_o_filtered)})`)
+                return []
+            }
         }
-
+        
         this.o_json_db_json_file.a_o.push(o_instance);
-
+        
+        this.f_apply_callback_before_write_file("create", [o_instance], o_class)
         await this.f_a_o_write_file(o_class);
-        return o_instance
+        
+
+        return [o_instance]
     }
     async f_a_o_read(
-        o_class, 
-        o_filter_criterium = {}
+        o_class,
+        f_filter_function
     ){
         await this.f_init();
         
         var a = await this.f_a_o_read_file(o_class);
-        var a_o_filtered = a.filter(function(o){
-            var b_match = true;
-            for(var s_prop in o_filter_criterium){
-                b_match = o_filter_criterium[s_prop] == o[s_prop]
+        var a_o_filtered = a.filter(
+            function(o){
+                return f_filter_function(o)
             }
-            return b_match
-        })
-        return a_o_filtered       
+        )
+        this.f_apply_callback_before_write_file("read", a_o_filtered, o_class)
+        return a_o_filtered     
     }
     async f_a_o_update(
         o_class, 
-        o_instance,
-        o_instance_updated
+        f_filter_function,
+        f_update_function
+    ){
+        await this.f_init();
+
+        var a = await this.f_a_o_read_file(o_class);
+
+        var a_o_filtered = a.filter(
+            function(o){
+                return f_filter_function(o)
+            }
+        )
+        a_o_filtered.forEach(
+            function(o){
+                f_update_function(o);
+            }
+        )
+
+        this.f_apply_callback_before_write_file("update", a_o_filtered, o_class);
+        return await this.f_a_o_write_file(o_class);
+    }
+    async f_a_o_delete(
+        o_class, 
+        f_filter_function
     ){
         await this.f_init();
 
         var a = await this.f_a_o_read_file(o_class);
         var a_o_filtered = a.filter(
             function(o){
-                var b_match = true;
-                for(var s_prop in o_instance){
-                    // console.log(s_prop)
-                    b_match = o_instance[s_prop] == o[s_prop]
-                }
-                return b_match
+                return !f_filter_function(o)
             }
         )
-
-        var a_o_callback_filtered = this.a_o_callback.filter(
-            o=>o.s_crud_operation_name == 'update'
-        )
-
-        for(var n_index in a_o_filtered){
-            var o = a_o_filtered[n_index];
-            for(var s_prop in o_instance_updated){
-                o[s_prop] = o_instance_updated[s_prop]
-            }
-
-            for(var n_index in a_o_callback_filtered){
-                const o_callback  = a_o_callback_filtered[n_index];
-                // console.log(o_callback)
-                o_callback.f_function(
-                    o_class,
-                    o
-                )
-            }
-        }
-
-        return await this.f_a_o_write_file(o_class);
-    }
-    async f_a_o_delete(
-        o_class, 
-        o_filter_criterium
-    ){
-        await this.f_init();
-
-        var a = await this.f_a_o_read_file(o_class);
-        var a_o_filtered = a.filter(
-            function(o, n_index){
-                var b_match = true;
-                for(var s_prop in o_filter_criterium){
-                    b_match = o_filter_criterium[s_prop] == o[s_prop]
-                }
-
-                return !b_match
+        var a_o_filtered_to_delete = a.filter(
+            function(o){
+                return f_filter_function(o)
             }
         )
+        
         this.o_json_db_json_file.a_o = a_o_filtered
+
+        this.f_apply_callback_before_write_file("delete",a_o_filtered_to_delete, o_class);
         await this.f_a_o_write_file(o_class);
+
         return this.o_json_db_json_file.a_o
     }
 }
